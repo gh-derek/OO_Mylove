@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>给最爱的你</title>
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(45deg, #ff6b6b, #ffcccb);
+      font-family: 'Arial', sans-serif;
+      color: #fff;
+      overflow: hidden;
+      position: relative;
+    }
+    /* 星空背景 */
+    canvas#stars {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+    }
+    /* 心形 */
+    .heart {
+      width: 80px;
+      height: 80px;
+      background: #ff3333;
+      position: relative;
+      transform: rotate(-45deg);
+      animation: beat 1s ease-in-out infinite;
+      margin-bottom: 20px;
+      z-index: 1;
+    }
+    .heart::before,
+    .heart::after {
+      content: '';
+      width: 80px;
+      height: 80px;
+      background: #ff3333;
+      border-radius: 50%;
+      position: absolute;
+    }
+    .heart::before { top: -40px; left: 0; }
+    .heart::after { left: 40px; top: 0; }
+    @keyframes beat {
+      0%, 100% { transform: rotate(-45deg) scale(1); }
+      50% { transform: rotate(-45deg) scale(1.15); }
+    }
+    /* 情话文字 */
+    #message {
+      font-size: 20px;
+      text-align: center;
+      max-width: 90%;
+      padding: 15px;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+      background: linear-gradient(45deg, #ff69b4, #ffd700, #40e0d0);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      animation: gradientText 5s linear infinite;
+      z-index: 1;
+    }
+    @keyframes gradientText {
+      0% { background-position: 0% 50%; }
+      100% { background-position: 400% 50%; }
+    }
+    .typing::after {
+      content: '|';
+      color: #fff;
+      animation: blink 0.7s infinite;
+    }
+    @keyframes blink {
+      50% { opacity: 0; }
+    }
+    /* 漂浮粒子（爱心或图片） */
+    .particle {
+      position: absolute;
+      width: 30px;
+      height: 30px;
+      background-size: contain;
+      background-repeat: no-repeat;
+      opacity: 0.8;
+      z-index: 0;
+    }
+    .heart-particle {
+      background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23ff4d4d"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>') no-repeat center;
+    }
+    .image-particle {
+      background: url('https://i.imgur.com/your-image.jpg') no-repeat center; /* 替换为你的图片链接 */
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+    }
+    /* 按钮 */
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 16px;
+      background: #ff4d4d;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: transform 0.3s;
+      z-index: 1;
+    }
+    button:hover {
+      transform: scale(1.1);
+    }
+    /* 音乐控件 */
+    audio {
+      position: fixed;
+      bottom: 10px;
+      right: 10px;
+      opacity: 0.7;
+      z-index: 1;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="stars"></canvas>
+  <div class="heart"></div>
+  <div id="message"></div>
+  <button onclick="surprise()">点我有惊喜</button>
+  <audio controls>
+    <source src="https://www.bensound.com/bensound-music/bensound-sweet.mp3" type="audio/mp3">
+    你的浏览器不支持音频播放。
+  </audio>
+  <script>
+    // 打字效果
+    const messages = [
+      "亲爱的，520快乐！",
+      "遇见你，是我代码里最美的bug。",
+      "这张照片，记录我们爱的瞬间！",
+      "愿我们的爱，像这首歌，永恒动听。"
+    ];
+    let messageIndex = 0;
+    let charIndex = 0;
+    let currentMessage = '';
+    const messageElement = document.getElementById('message');
+
+    function type() {
+      if (messageIndex < messages.length) {
+        if (charIndex < messages[messageIndex].length) {
+          currentMessage += messages[messageIndex][charIndex];
+          messageElement.textContent = currentMessage;
+          messageElement.classList.add('typing');
+          charIndex++;
+          setTimeout(type, 100);
+        } else {
+          messageElement.classList.remove('typing');
+          setTimeout(() => {
+            charIndex = 0;
+            currentMessage = '';
+            messageIndex++;
+            if (messageIndex < messages.length) {
+              setTimeout(type, 1500);
+            } else {
+              messageIndex = 0;
+              setTimeout(type, 2000);
+            }
+          }, 2000);
+        }
+      }
+    }
+
+    // 星空效果
+    const canvas = document.getElementById('stars');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    const stars = [];
+    for (let i = 0; i < 100; i++) {
+      stars.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        radius: Math.random() * 2,
+        opacity: Math.random() * 0.5 + 0.5
+      });
+    }
+    function drawStars() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      stars.forEach(star => {
+        ctx.beginPath();
+        ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255, 255, 255, ${star.opacity})`;
+        ctx.fill();
+        star.opacity += (Math.random() - 0.5) * 0.05;
+        if (star.opacity < 0.3) star.opacity = 0.3;
+        if (star.opacity > 1) star.opacity = 1;
+      });
+      requestAnimationFrame(drawStars);
+    }
+    drawStars();
+
+    // 漂浮粒子（爱心或图片）
+    const particles = [];
+    function createParticle() {
+      const isImage = Math.random() < 0.3; // 30%概率显示图片
+      const particle = document.createElement('div');
+      particle.className = 'particle ' + (isImage ? 'image-particle' : 'heart-particle');
+      particle.style.left = Math.random() * 100 + 'vw';
+      particle.style.top = '100vh';
+      document.body.appendChild(particle);
+      const duration = Math.random() * 5 + 5;
+      particle.animate([
+        { transform: 'translateY(0) rotate(0deg)', opacity: 0.8 },
+        { transform: `translateY(-${window.innerHeight + 100}px) rotate(${Math.random() * 360}deg)`, opacity: 0 }
+      ], {
+        duration: duration * 1000,
+        easing: 'ease-out'
+      }).onfinish = () => particle.remove();
+      particles.push(particle);
+    }
+    setInterval(createParticle, 500);
+
+    // 惊喜按钮
+    function surprise() {
+      alert('我爱你，永远不变！💖');
+      for (let i = 0; i < 10; i++) {
+        setTimeout(createParticle, i * 100);
+      }
+    }
+
+    // 尝试自动播放音乐
+    const audio = document.querySelector('audio');
+    audio.play().catch(() => {
+      // 微信可能阻止自动播放，显示控件让用户手动触发
+    });
+
+    window.onload = type;
+  </script>
+</body>
+</html>
